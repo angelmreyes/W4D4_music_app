@@ -15,6 +15,10 @@
 #
 
 class User < ApplicationRecord
+  #practice validation writing and understand each
+  validates :email, :session_token, presence: true, uniqueness: true
+  validates :password_digest, presence: true
+  validates :password, length: { minimum: 6 }, allow_nil: true #search, read about the allow_nil and length 
 
   # ? whats the deal with callbacks
   # Ensures that certain code will run whenever an 
@@ -23,28 +27,36 @@ class User < ApplicationRecord
   
   attr_reader :password
   
-  def find_by_credentials(email, password)
+  #understand each of the methods bellow and be able to write from memory
+
+  def self.find_by_credentials(email, password)
+    user = User.find_by(email: email)
+    return nil unless user && user.is_password?(password)
+    user
   end
 
-  def is_password?(password) #checks user's password during log in
-  end
-
-  def generate_session_token
-  end
-
-  def validations
+  def self.generate_session_token
+    SecureRandom::urlsafe_base64 
   end
 
   def password=(password) #sets the password_digest using BCrypt
-    # self.password_digest = 
+    @password = password
+    self.password_digest = BCrypt::Password.create(password)
+  end
+
+  def is_password?(password) #checks user's password during log in
+    bcrypt_password = BCrypt::Password.new(self.password_digest)
+    bcrypt_password.is_password?(password)
   end
 
   def reset_session_token!
+    self.update!(session_token: User.generate_session_token)
+    self.session_token
   end
 
   private
 
   def ensure_session_token
-    # self.session_token ||= 
+    self.session_token ||= User.generate_session_token
   end
 end
