@@ -9,10 +9,17 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #
+# Indexes
+#
+#  index_users_on_email_and_session_token  (email,session_token) UNIQUE
+#
 
 class User < ApplicationRecord
 
-  after_initialize
+  # ? whats the deal with callbacks
+  # Ensures that certain code will run whenever an 
+  # Active Record object is created, saved, updated, deleted, validated, or loaded from the database.
+  after_initialize :ensure_session_token
   
   attr_reader :password
   
@@ -29,12 +36,15 @@ class User < ApplicationRecord
   end
 
   def password=(password) #sets the password_digest using BCrypt
-    self.password_digest = 
-  end
-
-  def ensure_session_token
+    # self.password_digest = 
   end
 
   def reset_session_token!
+  end
+
+  private
+
+  def ensure_session_token
+    # self.session_token ||= 
   end
 end
